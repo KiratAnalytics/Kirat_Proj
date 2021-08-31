@@ -1,3 +1,6 @@
+COMMIT;
+SET TRANSACTION READ NAME 'queryprep';
+
 --Query: Which employees worked on projects costing over $50,000?
 SELECT DISTINCT e.EmployeeID
 FROM Employee e
@@ -21,11 +24,25 @@ INNER JOIN Developer d USING (EmployeeID)
 WHERE d.EducationLevel='Master';
 
 --Query: Developers and types of technological devices they are trained in (if trained in at least 2).
-SELECT e.EmployeeID, COUNT(td.DeviceType) Number of devices trained
+SELECT e.EmployeeID, COUNT(td.DeviceType) "Number of devices trained"
 FROM Employee e
 INNER JOIN Operates o ON e.EmployeeID=o.EmployeeID
 INNER JOIN TechnologicalDevice td ON td.DeviceID=o.DeviceID
 GROUP BY e.EmployeeID
 HAVING COUNT(td.DeviceType)>=2;
 
---Query: 
+--Query: Count meetings for projects hosted by Dept R&D B
+SELECT COUNT(*) AS "Meetings for project hosted by R And D Dept B"
+FROM TrainingSchedule ts
+INNER JOIN Project p ON p.ProjectID=ts.ProjectID
+INNER JOIN Department d ON d.DepartmentCode=p.DepartmentCode
+WHERE d.DepartmentName='Research and Development Department B';
+
+--Query: All meeting schedules attended by dev Jeff Thomas in Q1 of 2020
+SELECT ts.*
+FROM TrainingSchedule ts
+INNER JOIN Developer d ON d.EmployeeID=ts.DEmployeeID
+INNER JOIN Employee e ON e.EmployeeID=d.EmployeeID
+WHERE e.FirstName='Jeff' AND e.LastName='Thomas' AND MeetingTime BETWEEN '01-JAN-2020' AND '31-MAR-2020';
+
+--Nested query: 
