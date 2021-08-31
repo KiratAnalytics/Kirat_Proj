@@ -45,4 +45,14 @@ INNER JOIN Developer d ON d.EmployeeID=ts.DEmployeeID
 INNER JOIN Employee e ON e.EmployeeID=d.EmployeeID
 WHERE e.FirstName='Jeff' AND e.LastName='Thomas' AND MeetingTime BETWEEN '01-JAN-2020' AND '31-MAR-2020';
 
---Nested query: 
+--Query:  Employees who used the skill of penetration testing in more than one project in 2020.
+SELECT e.EmployeeID
+FROM Employee e 
+INNER JOIN 
+(SELECT a.EmployeeID EmpID, COUNT(a.ProjectID)
+FROM Assigned a
+INNER JOIN Skill s ON s.SkillID=a.SkillID
+WHERE a.SkillUsedDate BETWEEN '01-JAN-2020' AND '31-DEC-2020' AND s.SkillDescription='Penetration testing'
+GROUP BY a.EmployeeID
+HAVING COUNT(a.ProjectID)>1) Sub
+ON Sub.EmpID=e.EmployeeID;
