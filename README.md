@@ -1,0 +1,3 @@
+--This was developed in Oracle SQL syntax. Oracle SQL Developer v20.4.1.407.0006
+--We used PascalCase as most of the team was more comfortable with this form.
+--I will be releasing the accompanying entity-relationship diagram soon.
