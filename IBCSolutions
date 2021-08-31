@@ -1,1 +1,380 @@
+--Tables creation. This may be quite tedious to read through. Feel free to scroll down to queries :)
+--We used PascalCase as most of the team was more comfortable with this form. Personally, I prefer snake_case.
+
+CREATE TABLE Job
+  (JobTitle VARCHAR2(40)
+          CONSTRAINT JobJobTitlePk
+          PRIMARY KEY,
+    Salary NUMBER(7,0)
+  );
+
+CREATE TABLE Employee
+  (EmployeeID NUMBER(5,0)
+          CONSTRAINT EmployeeEmpIdPk
+          PRIMARY KEY,
+    Firstname VARCHAR2(40),
+    Lastname VARCHAR2(40),
+    CountryOfOrigin VARCHAR2(40),
+    EmployeeType VARCHAR2(1),
+    DateOfBirth DATE,
+    JobTitle VARCHAR2(40),
+        CONSTRAINT EmployeeJobTitleFk
+        FOREIGN KEY (JobTitle)
+        REFERENCES Job(JobTitle),
+    CONSTRAINT EmployeeEmployeeTypeCheck
+        CHECK (EmployeeType='D' OR EmployeeType='A'));
+    
+ 
+CREATE TABLE Married
+  (Employee1ID    NUMBER(5,0),
+    Employee2ID    NUMBER(5,0),
+    DateOfMarriage DATE,
+   CONSTRAINT MarriedEmp1IdEmp2IdPk
+     PRIMARY KEY (Employee1ID, Employee2ID),
+   CONSTRAINT MarriedEmp1IdFk
+     FOREIGN KEY (Employee1ID)
+     REFERENCES Employee(EmployeeID),
+   CONSTRAINT MarriedEmp2IdFk
+     FOREIGN KEY (Employee2ID)
+     REFERENCES Employee(EmployeeID));
+     
+CREATE TABLE Skill(
+   SkillID NUMBER(5,0)
+          CONSTRAINT SkillIdPk
+          PRIMARY KEY,
+   SkillDescription VARCHAR2(100));
+   
+CREATE TABLE Possesses
+  (EmployeeID NUMBER(5,0),
+   SkillID NUMBER(5,0),
+   CONSTRAINT PossessesSkillIdEmpIdPk
+     PRIMARY KEY (EmployeeID, SkillID),
+   CONSTRAINT PossessesEmpIdFk
+     FOREIGN KEY (EmployeeID)
+     REFERENCES Employee (EmployeeID),
+   CONSTRAINT PossessesSkillIdFk
+     FOREIGN KEY (SkillID)
+     REFERENCES Skill (SkillID));
+     
+CREATE TABLE Department
+  (DepartmentCode NUMBER(2,0)
+          CONSTRAINT DepartmentCodePk
+          PRIMARY KEY,
+    DepartmentDescription VARCHAR2(100),
+    DepartmentName VARCHAR2(40));
+    
+CREATE TABLE Project
+  (ProjectID NUMBER(6,0)
+          CONSTRAINT ProjectIdPk
+          PRIMARY KEY,
+    ProjectName VARCHAR2(40),
+    EstimatedCost NUMBER(8,0),
+    CustomerName VARCHAR2(40),
+    DepartmentCode NUMBER(5,0),
+    ProjectDescription VARCHAR2(100)
+  );
+  
+CREATE TABLE Assigned 
+  (EmployeeID NUMBER(5,0),
+          CONSTRAINT AssignedEmployeeIdFk
+          FOREIGN KEY (EmployeeID)
+          REFERENCES Employee(EmployeeID), 
+   ProjectID NUMBER(6,0),
+           CONSTRAINT AssignedProjectIdFk
+           FOREIGN KEY (ProjectID)
+           REFERENCES Project(ProjectID),
+   SkillID NUMBER(5,0), 
+           CONSTRAINT AssignedSkillIdFk
+           FOREIGN KEY (SkillID)
+           REFERENCES Skill(SkillID),
+    SkillUsedDate DATE,
+    CONSTRAINT AssignedEmpProjectSkillDatePk
+          PRIMARY KEY (SkillID, ProjectID, EmployeeID, SkillUsedDate)
+  );
+  
+  CREATE TABLE Location
+  (LocationID NUMBER(6,0)
+          CONSTRAINT LocationIdPk
+          PRIMARY KEY,
+    LocationMaintainanceTime TIMESTAMP,
+    LocationStartTime TIMESTAMP,
+    Address VARCHAR2(90),
+    LocationName VARCHAR2(60));
+    
+CREATE TABLE Room
+  (LocationID NUMBER(6,0),
+    RoomNumber NUMBER(3,0),
+    ProjectID NUMBER(6,0),
+    RoomType VARCHAR2(1),
+    CONSTRAINT RoomLocationIdFk
+          FOREIGN KEY (LocationID)
+          REFERENCES Location(LocationID),
+   CONSTRAINT RoomLocationIdRoomNoPk
+     PRIMARY KEY (LocationID, RoomNumber),
+   CONSTRAINT RoomRoomTypeCheck
+    CHECK (RoomType='O' or RoomType='L' or RoomType='M'));
+     
+  CREATE TABLE Lab
+    (RoomNumber NUMBER(3,0),
+    LocationID NUMBER(6,0),
+    CONSTRAINT LabRoomNoLocationIdFk
+            FOREIGN KEY(RoomNumber, LocationID)
+            REFERENCES Room(RoomNumber, LocationID),
+     Occupancy NUMBER(2,0),
+     Layout VARCHAR2(100),
+     CONSTRAINT LabRoomNumberLocationIdPk
+            PRIMARY KEY (RoomNumber, LocationID)
+    );
+    
+CREATE TABLE MeetingRoom
+    (RoomNumber NUMBER(3,0),
+     LocationID NUMBER(6,0),
+      CONSTRAINT MeetingRoomNoLocationIdFk
+            FOREIGN KEY(RoomNumber, LocationID)
+            REFERENCES Room(RoomNumber, LocationID),
+     Occupancy NUMBER(2,0),
+     Layout VARCHAR2(100),
+     CONSTRAINT MeetingRoomNumberLocationIdPk
+          PRIMARY KEY (RoomNumber, LocationID)
+    );
+
+CREATE TABLE Office
+    (RoomNumber NUMBER(3,0),
+     LocationID NUMBER(6,0),
+     CONSTRAINT OfficeRoomNoLocationIdFk
+            FOREIGN KEY(RoomNumber, LocationID)
+            REFERENCES Room(RoomNumber, LocationID),
+     RoomTelephone NUMBER(15,0),
+     CONSTRAINT OfficeRoomNumberLocationIdPk 
+          PRIMARY KEY (RoomNumber, LocationID));
+
+CREATE TABLE AdministrationStaff
+   (EmployeeID NUMBER(5,0)
+          CONSTRAINT AdminStaffEmpIdPk
+          PRIMARY KEY,
+    CONSTRAINT AdminStaffEmpIdFk
+          FOREIGN KEY (EmployeeID)
+          REFERENCES Employee(EmployeeID),
+    AdminLevel NUMBER(2),
+    AdminType VARCHAR2(30),
+    TypeDescription VARCHAR2(100), 
+    DepartmentCode NUMBER(2,0),
+    CONSTRAINT AdminStaffDeptCodeFk
+          FOREIGN KEY (DepartmentCode)
+          REFERENCES Department(DepartmentCode));
+          
+CREATE TABLE Developer
+   (EmployeeID NUMBER(5,0)
+          CONSTRAINT DeveloperEmpIdPk
+          PRIMARY KEY,
+    CONSTRAINT DeveloperStaffEmpIdFk
+          FOREIGN KEY (EmployeeID)
+          REFERENCES Employee(EmployeeID),
+    EducationLevel VARCHAR2(20),
+    DeveloperLevel NUMBER(2));
+    
+CREATE TABLE TechnologicalDevice
+      (DeviceID NUMBER(6,0)
+            CONSTRAINT TechnologicalDeviceIdPk
+            PRIMARY KEY, 
+       DeviceDescription VARCHAR(30),
+       DeviceType VARCHAR(40));
+       
+CREATE TABLE Operates 
+  (EmployeeID NUMBER(5,0),
+   CONSTRAINT OperatesEmpIdFk
+          FOREIGN KEY(EmployeeID)
+          REFERENCES Employee(EmployeeID), 
+   DeviceID NUMBER(6,0),
+   CONSTRAINT OperatesDeviceIdFk
+          FOREIGN KEY(DeviceID)
+          REFERENCES TechnologicalDevice(DeviceID),
+   CONSTRAINT OperatesEmpIdDeviceIdPk
+          PRIMARY KEY (EmployeeID, DeviceID)
+  );
+  
+  CREATE TABLE TrainingSchedule (
+      AEmployeeID NUMBER(5,0),
+      CONSTRAINT ScheduleAdminIdFk
+          FOREIGN KEY (AEmployeeID)
+          REFERENCES AdministrationStaff(EmployeeID),
+      DEmployeeID NUMBER(5,0),
+      CONSTRAINT ScheduleDeveloperIdFk
+          FOREIGN KEY (DEmployeeID)
+          REFERENCES Developer(EmployeeID),
+      ProjectID NUMBER(6,0),
+      CONSTRAINT ScheduleProjectIdFk
+          FOREIGN KEY (ProjectID)
+          REFERENCES Project(ProjectID),
+      RoomNumber NUMBER(3,0),
+      LocationID  NUMBER(6,0),
+      CONSTRAINT ScheduleRoomNumberLocationIdFk
+            FOREIGN KEY(RoomNumber, LocationID)
+            REFERENCES Room(RoomNumber, LocationID),
+      MeetingTime TIMESTAMP,
+      CONSTRAINT SchedulePk
+      PRIMARY KEY (AEmployeeID, DEmployeeID, ProjectID, RoomNumber, LocationID, MeetingTime)
+);
+
+--Data insertion
+INSERT INTO Job VALUES ('Junior Developer', 25000);
+INSERT INTO Job VALUES ('Customer Service', 50000);
+INSERT INTO Job VALUES ('Head Admin', 100000);
+INSERT INTO Job VALUES ('CEO', 300000);
+INSERT INTO Job VALUES ('Scrum Master', 120000);
+INSERT INTO Job VALUES ('Senior Developer', 70000);
+
+INSERT INTO Employee VALUES (1000, 'Tom', 'Smith', 'NZ', 'A', '01-JAN-2001', 'Customer Service');
+INSERT INTO Employee VALUES (1001, 'Adam', 'Smith', 'IN', 'A', '05-MAR-2020', 'Customer Service');
+INSERT INTO Employee VALUES (1002,'Kanye', 'West', 'UK', 'A', '11-JAN-2001', 'Head Admin');
+INSERT INTO Employee VALUES (1003,'Tim', 'West', 'FR', 'A', '01-FEB-1999', 'Head Admin');
+INSERT INTO Employee VALUES (1004,'Adam', 'Savage','US', 'A', '01-JAN-1995', 'Head Admin');
+INSERT INTO Employee VALUES (1005, 'Kayla', 'Savage', 'AU', 'D', '03-JAN-1996', 'Junior Developer');
+INSERT INTO Employee VALUES (1006, 'Allister', 'Jones', 'DE', 'D', '23-JUL-1999', 'Junior Developer');
+INSERT INTO Employee VALUES (1007, 'Emilia', 'Jones', 'US', 'D', '20-AUG-1983', 'Scrum Master');
+INSERT INTO Employee VALUES (1008, 'Gurpeal', 'Singh', 'IN', 'D', '12-AUG-1965', 'Senior Developer');
+INSERT INTO Employee VALUES (1009, 'Alexia', 'Singh', 'IN', 'D', '03-JAN-1996', 'Junior Developer');
+INSERT INTO Employee VALUES (1010, 'Jeff', 'Thomas', 'AU', 'D', '04-JUN-1975', 'Junior Developer');
+
+INSERT INTO Married VALUES (1001,1002, '11-DEC-2020');
+INSERT INTO Married VALUES (1003,1004, '5-NOV-2019');
+INSERT INTO Married VALUES (1005,1006, '6-JUL-2018');
+INSERT INTO Married VALUES (1007,1008, '3-OCT-2017');
+INSERT INTO Married VALUES (1009,1010, '7-APR-2015');
+
+INSERT INTO Department VALUES (1, 'Accounting department handles the recording of significant economic events', 'Accounting');
+INSERT INTO Department VALUES (2, 'R and D department A handles research into artificial intelligence and data science technologies', 'Research and Development Department A');
+INSERT INTO Department VALUES (3, 'R and D department B handles research into cloud computing technologies and IoT solutions', 'Research and Development Department B');
+INSERT INTO Department VALUES (4, 'The HR Department manages internal IBC work culture and directs administrative duties', 'Human resources');
+INSERT INTO Department VALUES (5, 'The client success team directly deal with customers to resolve any issues', 'Client success');
+INSERT INTO Department VALUES (6, 'The analytics department tends to deal with IBC solutions which deal with business or data analytics', ' Analytics solutions');
+INSERT INTO Department VALUES (7, 'The 3D Printing team constructs three-dimensional objects from CAD models', '3D printing');
+
+INSERT INTO Project VALUES (1001, 'Cloud Storage Solution', 20000, 'Reaperscans', 3, 'make a storage accessable for the site');
+INSERT INTO Project VALUES (1002, 'Cloud Storage Solution', 25000, 'Flamescans', 3, 'make a storage accessable for the site');
+INSERT INTO Project VALUES (1003, 'Cloud Storage Solution', 55000, 'Asurascans', 3, 'make a storage accessable for the site');
+INSERT INTO Project VALUES ('1004', 'Vulnerability Testing', 15000, 'Intertech', 5, 'Evaluate cybersecurity through authorized simulated attacks on system');
+INSERT INTO Project VALUES ('1005', 'Vulnerability Testing', 100000, 'Cisco', 5, 'Evaluate cybersecurity through authorized simulated attacks on system');
+
+INSERT INTO Developer VALUES (1005, 'High school', 5);
+INSERT INTO Developer VALUES (1006, 'Bachelor', 5);
+INSERT INTO Developer VALUES (1007, 'Master', 2);
+INSERT INTO Developer VALUES (1008, 'PhD', 1);
+INSERT INTO Developer VALUES (1009, 'High school', 5);
+INSERT INTO Developer VALUES (1010, 'Master', 3);
+
+INSERT INTO AdministrationStaff VALUES (1001, 1, 'Accountant', 'Manage financial information', 1);
+INSERT INTO AdministrationStaff VALUES (1002, 2, 'HR Recruiter', 'Recruit for organization', 4);
+INSERT INTO AdministrationStaff VALUES (1003, 5, 'Client Success Director', 'Responsible for all post-sale functions of a business', 5);
+INSERT INTO AdministrationStaff VALUES (1004, 1, 'Administrative Assistant', 'Perform administrative and clerical duties', 6);
+INSERT INTO AdministrationStaff VALUES (1005, 4, 'Executive Assistant', 'Handle execurive office duties', 2);
+
+INSERT INTO TechnologicalDevice VALUES (111000, 'Laptop', 'Portable Company Device');
+INSERT INTO TechnologicalDevice VALUES (111004, 'Projector', 'Building Device');
+INSERT INTO TechnologicalDevice VALUES (111008, '3D Printer', 'Building Device');
+INSERT INTO TechnologicalDevice VALUES (111010, 'Digital whiteboards', 'Building Device');
+INSERT INTO TechnologicalDevice VALUES (111018, 'Cameras', 'Portable Company Device');
+
+INSERT INTO Operates VALUES (1007, 111000);
+INSERT INTO Operates VALUES (1007, 111004);
+INSERT INTO Operates VALUES (1007, 111010);
+INSERT INTO Operates VALUES (1008, 111008);
+INSERT INTO Operates VALUES (1008, 111000);
+INSERT INTO Operates VALUES (1008, 111004);
+INSERT INTO Operates VALUES (1008, 111018);
+INSERT INTO Operates VALUES (1008, 111010);
+INSERT INTO Operates VALUES (1005, 111018);
+INSERT INTO Operates VALUES (1006, 111010);
+INSERT INTO Operates VALUES (1006, 111000);
+INSERT INTO Operates VALUES (1006, 111008);
+INSERT INTO Operates VALUES (1006, 111018);
+INSERT INTO Operates VALUES (1009, 111000);
+INSERT INTO Operates VALUES (1010, 111000);
+
+INSERT INTO Skill VALUES (50000, 'Performance tuning');
+INSERT INTO Skill VALUES (50001, 'Data conversion');
+INSERT INTO Skill VALUES (50500, 'Data mapping');
+INSERT INTO Skill VALUES (50501, 'Data security');
+INSERT INTO Skill VALUES (50502, 'Data modelling');
+INSERT INTO Skill VALUES (50503, 'Penetration testing');
+
+INSERT INTO Possesses VALUES (1008, 50503);
+INSERT INTO Possesses VALUES (1008, 50502);
+INSERT INTO Possesses VALUES (1007, 50503);
+INSERT INTO Possesses VALUES (1007, 50500);
+INSERT INTO Possesses VALUES (1005, 50000);
+INSERT INTO Possesses VALUES (1006, 50001);
+INSERT INTO Possesses VALUES (1009, 50500);
+INSERT INTO Possesses VALUES (1010, 50502);
+INSERT INTO Possesses VALUES (1009, 50503);
+INSERT INTO Possesses VALUES (1010, 50503);
+INSERT INTO Possesses VALUES (1000, 50001);
+INSERT INTO Possesses VALUES (1001, 50001);
+INSERT INTO Possesses VALUES (1002, 50001);
+INSERT INTO Possesses VALUES (1003, 50001);
+INSERT INTO Possesses VALUES (1004, 50001);
+
+INSERT INTO Assigned VALUES (1008, 1005, 50503, '01-JAN-2020');
+INSERT INTO Assigned VALUES (1008, 1004, 50503, '04-APR-2020');
+INSERT INTO Assigned VALUES (1007, 1005, 50503, '05-JUN-2020');
+INSERT INTO Assigned VALUES (1007, 1004, 50503, '06-JUN-2020');
+INSERT INTO Assigned VALUES (1010, 1002, 50503, '06-JUN-2019');
+INSERT INTO Assigned VALUES (1009, 1001, 50503, '30-NOV-2020');
+INSERT INTO Assigned VALUES (1005, 1001, 50000, '17-SEP-2019');
+INSERT INTO Assigned VALUES (1008, 1002, 50502, '18-OCT-2020');
+INSERT INTO Assigned VALUES (1010, 1003, 50502, '24-JUL-2021');
+INSERT INTO Assigned VALUES (1008, 1002, 50502, '16-JUL-2021');
+INSERT INTO Assigned VALUES (1006, 1004, 50501, '20-OCT-2020');
+INSERT INTO Assigned VALUES (1006, 1003, 50501, '20-OCT-2020');
+
+INSERT INTO Location VALUES (900000, '07-JAN-2020 10:10:10.00 AM', '01-JAN-2010 04:55:10.00 PM', '2/7 Mitchell Street, Brunswick, VIC 3056 AU', 'VIC 1');
+INSERT INTO Location VALUES (900001, '12-FEB-2020 03:12:16.23 PM', '01-JAN-2010 12:40:10.90 PM', '123/91-95 Mackellar Street, Emu Plains, NSW 2750 AU', 'NSW 1');
+INSERT INTO Location VALUES (900002, '01-JAN-2020 11:36:07.45 PM', '01-JAN-2010 01:10:40.80 PM', '44 Chester Street opposite Farm, Schofields, NSW 2762 AU', 'NSW 2');
+INSERT INTO Location VALUES (900004, '01-JAN-2020 04:24:45.76 AM', '01-JAN-2010 07:10:15.70 AM', '18811 Hemlock Lane, Harlingen, TX 78550 USA', 'TX 1');
+INSERT INTO Location VALUES (900005, '01-JAN-2020 07:03:30.38 AM', '01-JAN-2010 08:11:10.00 PM', '708C/3 Broughton Street, Parramatta, NSW 2150 AU', 'NSW 2');
+INSERT INTO Location VALUES (900006, '01-JAN-2020 07:03:30.38 AM', '06-MAY-2011 09:19:15.50 PM', '32, C Wing, A Bldg, Pathanwadi, Malad, Mumbai, MH 400097 IND', 'MH 1');
+
+INSERT INTO Room VALUES (900000, 100, 1004, 'O');
+INSERT INTO Room VALUES (900002, 102, 1005, 'O');
+INSERT INTO Room VALUES (900004, 110, 1001, 'O');
+INSERT INTO Room VALUES (900006, 120, 1002, 'O');
+INSERT INTO Room VALUES (900006, 108, 1002, 'O');
+INSERT INTO Room VALUES (900001, 102, 1003, 'M');
+INSERT INTO Room VALUES (900002, 101, 1001, 'M');
+INSERT INTO Room VALUES (900004, 100, 1001, 'M');
+INSERT INTO Room VALUES (900004, 109, 1001, 'M');
+INSERT INTO Room VALUES (900005, 111, 1002, 'M');
+INSERT INTO Room VALUES (900000, 101, 1002, 'L');
+INSERT INTO Room VALUES (900001, 109, 1005, 'L');
+INSERT INTO Room VALUES (900004, 119, 1004, 'L');
+INSERT INTO Room VALUES (900004, 101, 1003, 'L');
+INSERT INTO Room VALUES (900006, 112, 1002, 'L');
+
+INSERT INTO Office VALUES(100, 900000, '61355501705'); 
+INSERT INTO Office VALUES(102, 900002, '61255509871'); 
+INSERT INTO Office VALUES(108, 900006, '913858210056'); 
+INSERT INTO Office VALUES(110, 900004, '9562008251'); 
+INSERT INTO Office VALUES(120, 900006, '913856722003'); 
+
+INSERT INTO MeetingRoom VALUES (100, 900004, 15, 'This meeting room has a lot of windows with an open floor plan');
+INSERT INTO MeetingRoom VALUES (101, 900002, 15, 'this meeting room has windows computers');
+INSERT INTO MeetingRoom VALUES (102, 900001, 20, 'this meeeting room has a lot of chairs');
+INSERT INTO MeetingRoom VALUES (109, 900004, 20, 'this meeting room has lounges for the seating area');
+INSERT INTO MeetingRoom VALUES (111, 900005, 20, 'this meeting room has two smartboards');
+
+INSERT INTO Lab VALUES (101, 900000, 20, 'Small lab which can host a small number of people and has tools such as bunsen burners');
+INSERT INTO Lab VALUES (109, 900001, 40, 'The lab is very spacey and can host up to 40 people');
+INSERT INTO Lab VALUES (119, 900004, 30, 'Medium-sized laboratory which focuses on Research and Development and AI project solutions');
+INSERT INTO Lab VALUES (101, 900004, 15, 'Micro-lab which focuses on biotechnology');
+INSERT INTO Lab VALUES (112, 900006, 20, 'Engineering lab which has computers for software solution development');
+
+INSERT INTO TrainingSchedule VALUES (1003, 1006, 1001, 100, 900004, '18-OCT-2018 11:12:13.40 AM');
+INSERT INTO TrainingSchedule VALUES (1002, 1005, 1001, 101, 900002, '19-OCT-2020 12:30:30.30 PM');
+INSERT INTO TrainingSchedule VALUES (1004, 1005, 1001, 109, 900004, '06-JUN-2021 10:00:00.00 AM');
+INSERT INTO TrainingSchedule VALUES (1004, 1009, 1002, 109, 900004, '05-MAY-2021 02:15:29.51 PM');
+INSERT INTO TrainingSchedule VALUES (1004, 1009, 1002, 102, 900001, '07-OCT-2019 07:50:19.79 AM');
+INSERT INTO TrainingSchedule VALUES (1003, 1010, 1003, 111, 900005, '07-OCT-2019 07:47:13.46 PM');
+INSERT INTO TrainingSchedule VALUES (1002, 1010, 1004, 109, 900004, '10-FEB-2020 03:57:10.13 PM');
+INSERT INTO TrainingSchedule VALUES (1002, 1010, 1005, 111, 900005, '19-MAR-2020 04:48:10.00 AM');
+
 
