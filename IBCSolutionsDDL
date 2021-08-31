@@ -1,5 +1,4 @@
---Tables creation. This may be quite tedious to read through. Feel free to scroll down to queries :)
---We used PascalCase as most of the team was more comfortable with this form. Personally, I prefer snake_case.
+--Tables creation. 
 
 CREATE TABLE Job
   (JobTitle VARCHAR2(40)
