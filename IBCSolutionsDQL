@@ -20,7 +20,12 @@ FROM Employee e
 INNER JOIN Developer d USING (EmployeeID)
 WHERE d.EducationLevel='Master';
 
---Query: Developers and types of technological devices they are trained in.
-SELECT
-FROM
-WHERE
+--Query: Developers and types of technological devices they are trained in (if trained in at least 2).
+SELECT e.EmployeeID, COUNT(td.DeviceType) Number of devices trained
+FROM Employee e
+INNER JOIN Operates o ON e.EmployeeID=o.EmployeeID
+INNER JOIN TechnologicalDevice td ON td.DeviceID=o.DeviceID
+GROUP BY e.EmployeeID
+HAVING COUNT(td.DeviceType)>=2;
+
+--Query: 
