@@ -14,3 +14,13 @@ SELECT DISTINCT p.ProjectID,
     END "Budget Check"
 FROM Project p;
 
+--Query: Report for developers with Master education level. Show last name before first.
+SELECT e.EmployeeID, e.LastName||' '||e.FirstName "Emp_FullName"
+FROM Employee e
+INNER JOIN Developer d USING (EmployeeID)
+WHERE d.EducationLevel='Master';
+
+--Query: Developers and types of technological devices they are trained in.
+SELECT
+FROM
+WHERE
