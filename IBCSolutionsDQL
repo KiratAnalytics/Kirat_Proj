@@ -1,0 +1,16 @@
+--Query: Which employees worked on projects costing over $50,000?
+SELECT DISTINCT e.EmployeeID
+FROM Employee e
+INNER JOIN Assigned a USING(EmployeeID)
+INNER JOIN Project p USING(ProjectID)
+WHERE p.EstimatedCost>50000;
+
+--Query extension: If project cost less than 50000, display as 'under'. Otherwise, display as 'over'.
+SELECT DISTINCT p.ProjectID,
+   CASE 
+        WHEN p.EstimatedCost>50000 THEN 'Over'
+        WHEN p.EstimatedCost<50000 THEN 'Under'
+        ELSE 'Equal'
+    END "Budget Check"
+FROM Project p;
+
